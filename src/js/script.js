@@ -75,6 +75,40 @@ const updateKeyboardState = (currentArray, keyType = 'keyboardKey') => {
   });
 };
 
+function textareaFilling(event) {
+  const textarea = document.querySelector('.textarea-body');
+  textarea.focus();
+  const cursorPosition = textarea.selectionStart;
+  if (event.target.textContent === 'Backspace' || event.code === 'Backspace') {
+    if (cursorPosition !== 0) {
+      textarea.value = textarea.value.slice(0, cursorPosition - 1)
+      + textarea.value.slice(cursorPosition);
+      textarea.setSelectionRange(cursorPosition - 1, cursorPosition - 1);
+    }
+  } else if (event.target.textContent === 'Tab' || event.code === 'Tab') {
+    textarea.value = `${textarea.value.slice(0, cursorPosition)}  ${textarea.value.slice(cursorPosition)}`;
+    textarea.setSelectionRange(cursorPosition + 2, cursorPosition + 2);
+  } else if (event.target.textContent === 'Del' || event.code === 'Delete') {
+    textarea.value = textarea.value.slice(0, cursorPosition)
+    + textarea.value.slice(cursorPosition + 1);
+    textarea.setSelectionRange(cursorPosition, cursorPosition);
+  } else if (['CapsLock', 'Shift', 'Ctrl', 'Alt', 'Win'].includes(event.target.textContent)
+  || ['CapsLock', 'ShiftLeft', 'ShiftRight', 'ControlLeft', 'AltLeft', 'AltRight', 'ControlRight', 'MetaLeft'].includes(event.code)) {
+    textarea.value += '';
+  } else if (event.target.textContent === 'Enter' || event.code === 'Enter') {
+    textarea.value = `${textarea.value.slice(0, cursorPosition)}\n${textarea.value.slice(cursorPosition)}`;
+  } else if (event.target.textContent === 'Space' || event.code === 'Space') {
+    textarea.value = `${textarea.value.slice(0, cursorPosition)} ${textarea.value.slice(cursorPosition)}`;
+    textarea.setSelectionRange(cursorPosition + 1, cursorPosition + 1);
+  } else if (!event.code) {
+    textarea.value = `${textarea.value.slice(0, cursorPosition)}${event.target.textContent}${textarea.value.slice(cursorPosition)}`;
+    textarea.setSelectionRange(cursorPosition + 1, cursorPosition + 1);
+  } else {
+    textarea.value = `${textarea.value.slice(0, cursorPosition)}${document.querySelector(`.${event.code}`).textContent}${textarea.value.slice(cursorPosition)}`;
+    textarea.setSelectionRange(cursorPosition + 1, cursorPosition + 1);
+  }
+}
+
 let capsLockEnabled = false;
 
 // capsLock handler
@@ -98,6 +132,7 @@ const onKeysDown = (e) => {
     }
     updateKeyboardState(currnetLanguage);
   }
+  textareaFilling(e);
   if (e.code === 'CapsLock') {
     capsLockEnabled = !capsLockEnabled;
   }
@@ -129,6 +164,10 @@ const onKeysUp = (e) => {
 };
 
 const onKeyClick = () => {
+  document.querySelectorAll('.keyboard__key').forEach((key) => {
+    key.addEventListener('click', textareaFilling);
+  });
+
   document.querySelectorAll('.keyboard__key').forEach((key) => {
     key.addEventListener('mousedown', (e) => {
       if (e.target.classList.contains('CapsLock')) {
