@@ -4,17 +4,15 @@ import keyLayoutEn from './keyLayoutEn.js';
 let currnetLanguage = keyLayoutEn;
 
 // work with locale storage
-function getLocalStorage() {
-  return localStorage.getItem('currentLen');
-}
+const getLocalStorage = () => localStorage.getItem('currentLen');
 
-function setLocalStorage() {
+const setLocalStorage = () => {
   if (currnetLanguage === keyLayoutEn) {
     localStorage.setItem('currentLen', 'en');
   } else {
     localStorage.setItem('currentLen', 'ua');
   }
-}
+};
 
 const currentLenValue = getLocalStorage();
 if (currentLenValue === 'en') {
@@ -24,7 +22,7 @@ if (currentLenValue === 'en') {
 }
 
 // generate basic layout
-function generateStandartFilling() {
+const generateStandartFilling = () => {
   const filling = `<div class="container">
     <h1 class="title">RSS Vitrual keyboard</h1>
     <textarea class="textarea-body" cols="30" rows="10" autofocus></textarea>
@@ -33,10 +31,10 @@ function generateStandartFilling() {
     <p>To switch the language combination: left ctrl + alt</p>
   </div>`;
   document.body.insertAdjacentHTML('afterbegin', filling);
-}
+};
 
 // generate keybord layout
-function generateKeyboard(array, value) {
+const generateKeyboard = (array, value) => {
   const keyboardBody = document.querySelector('.keyboard-body');
   array.forEach((keys) => {
     const keysRow = document.createElement('div');
@@ -61,10 +59,10 @@ function generateKeyboard(array, value) {
     });
     keyboardBody.append(keysRow);
   });
-}
+};
 
 // updating keyboard keys according to requiremnets
-function updateKeys(currentArray, keyType = 'keyboardKey') {
+const updateKeys = (currentArray, keyType = 'keyboardKey') => {
   const specialKeys = [];
   currentArray.forEach((el) => {
     el.forEach((element) => {
@@ -75,10 +73,10 @@ function updateKeys(currentArray, keyType = 'keyboardKey') {
   specialKeys.forEach((key, i) => {
     document.querySelectorAll('.keyboard__key')[i].textContent = key;
   });
-}
+};
 
 // keyyboard keys handlers
-function onKeysDown(e) {
+const onKeysDown = (e) => {
   e.preventDefault();
   if (e.ctrlKey && e.altKey) {
     if (currnetLanguage === keyLayoutEn) {
@@ -93,15 +91,15 @@ function onKeysDown(e) {
       key.classList.add('active');
     }
   });
-}
+};
 
-function onKeysUp() {
+const onKeysUp = () => {
   document.querySelectorAll('.keyboard__key').forEach((key) => {
     key.classList.remove('active');
   });
-}
+};
 
-function onKeyClick() {
+const onKeyClick = () => {
   document.querySelectorAll('.keyboard__key').forEach((key) => {
     key.addEventListener('mousedown', (e) => {
       e.target.classList.add('active');
@@ -117,16 +115,16 @@ function onKeyClick() {
       e.target.classList.remove('active');
     });
   });
-}
+};
 
 // initial function
-function init() {
+const init = () => {
   generateStandartFilling();
   generateKeyboard(currnetLanguage, 'keyboardKey');
   onKeyClick();
   window.addEventListener('keydown', onKeysDown);
   window.addEventListener('keyup', onKeysUp);
-}
+};
 
 window.addEventListener('beforeunload', setLocalStorage);
 window.addEventListener('load', () => {
