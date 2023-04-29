@@ -3,6 +3,26 @@ import keyLayoutEn from './keyLayoutEn.js';
 
 let currnetLanguage = keyLayoutEn;
 
+// work with locale storage
+function getLocalStorage() {
+  return localStorage.getItem('currentLen');
+}
+
+function setLocalStorage() {
+  if (currnetLanguage === keyLayoutEn) {
+    localStorage.setItem('currentLen', 'en');
+  } else {
+    localStorage.setItem('currentLen', 'ua');
+  }
+}
+
+const currentLenValue = getLocalStorage();
+if (currentLenValue === 'en') {
+  currnetLanguage = keyLayoutEn;
+} else {
+  currnetLanguage = keyLayoutUa;
+}
+
 // generate basic layout
 function generateStandartFilling() {
   const filling = `<div class="container">
@@ -43,6 +63,7 @@ function generateKeyboard(array, value) {
   });
 }
 
+// updating keyboard keys according to requiremnets
 function updateKeys(currentArray, keyType = 'keyboardKey') {
   const specialKeys = [];
   currentArray.forEach((el) => {
@@ -56,6 +77,7 @@ function updateKeys(currentArray, keyType = 'keyboardKey') {
   });
 }
 
+// keyyboard keys handlers
 function onKeysDown(e) {
   e.preventDefault();
   if (e.ctrlKey && e.altKey) {
@@ -97,6 +119,7 @@ function onKeyClick() {
   });
 }
 
+// initial function
 function init() {
   generateStandartFilling();
   generateKeyboard(currnetLanguage, 'keyboardKey');
@@ -105,8 +128,8 @@ function init() {
   window.addEventListener('keyup', onKeysUp);
 }
 
-// window.addEventListener('beforeunload', setLocalStorage);
+window.addEventListener('beforeunload', setLocalStorage);
 window.addEventListener('load', () => {
-  // getLocalStorage();
+  getLocalStorage();
   init();
 });
