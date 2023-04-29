@@ -76,6 +76,17 @@ const updateKeyboardState = (currentArray, keyType = 'keyboardKey') => {
 };
 
 let capsLockEnabled = false;
+
+// capsLock handler
+
+function onCapsLock(capsLockState) {
+  if (capsLockState) {
+    updateKeyboardState(currnetLanguage, 'caps');
+  } else {
+    updateKeyboardState(currnetLanguage);
+  }
+}
+
 // keyyboard keys handlers
 const onKeysDown = (e) => {
   e.preventDefault();
@@ -90,14 +101,17 @@ const onKeysDown = (e) => {
   if (e.code === 'CapsLock') {
     capsLockEnabled = !capsLockEnabled;
   }
-  if (capsLockEnabled) {
-    updateKeyboardState(currnetLanguage, 'caps');
-  } else {
-    updateKeyboardState(currnetLanguage);
-  }
+  // if (capsLockEnabled) {
+  //   updateKeyboardState(currnetLanguage, 'caps');
+  // } else {
+  //   updateKeyboardState(currnetLanguage);
+  // }
+  onCapsLock(capsLockEnabled);
   document.querySelectorAll('.keyboard__key').forEach((key) => {
-    if (key.classList.contains(`${e.code}`)) {
+    if (key.classList.contains('CapsLock') && capsLockEnabled) {
       key.classList.add('active');
+    } else {
+      key.classList.remove('active');
     }
   });
 };
@@ -117,17 +131,30 @@ const onKeysUp = (e) => {
 const onKeyClick = () => {
   document.querySelectorAll('.keyboard__key').forEach((key) => {
     key.addEventListener('mousedown', (e) => {
+      if (e.target.classList.contains('CapsLock')) {
+        capsLockEnabled = !capsLockEnabled;
+      }
+      onCapsLock(capsLockEnabled);
       e.target.classList.add('active');
     });
   });
   document.querySelectorAll('.keyboard__key').forEach((key) => {
     key.addEventListener('mouseup', (e) => {
-      e.target.classList.remove('active');
+      if (e.target.classList.contains('CapsLock') && capsLockEnabled) {
+        updateKeyboardState(currnetLanguage, 'caps');
+        e.target.classList.add('active');
+      } else {
+        e.target.classList.remove('active');
+      }
     });
   });
   document.querySelectorAll('.keyboard__key').forEach((key) => {
     key.addEventListener('mouseleave', (e) => {
-      e.target.classList.remove('active');
+      if (e.target.classList.contains('CapsLock') && capsLockEnabled) {
+        e.target.classList.add('active');
+      } else {
+        e.target.classList.remove('active');
+      }
     });
   });
 };
