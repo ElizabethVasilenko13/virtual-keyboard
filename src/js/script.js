@@ -43,8 +43,29 @@ function generateKeyboard(array, value) {
   });
 }
 
+function updateKeys(currentArray, keyType = 'keyboardKey') {
+  const specialKeys = [];
+  currentArray.forEach((el) => {
+    el.forEach((element) => {
+      specialKeys.push(element[`${keyType}`]);
+      return specialKeys;
+    });
+  });
+  specialKeys.forEach((key, i) => {
+    document.querySelectorAll('.keyboard__key')[i].textContent = key;
+  });
+}
+
 function onKeysDown(e) {
   e.preventDefault();
+  if (e.ctrlKey && e.altKey) {
+    if (currnetLanguage === keyLayoutEn) {
+      currnetLanguage = keyLayoutUa;
+    } else {
+      currnetLanguage = keyLayoutEn;
+    }
+    updateKeys(currnetLanguage);
+  }
   document.querySelectorAll('.keyboard__key').forEach((key) => {
     if (key.classList.contains(`${e.code}`)) {
       key.classList.add('active');
