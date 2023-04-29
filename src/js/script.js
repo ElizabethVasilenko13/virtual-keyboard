@@ -62,7 +62,7 @@ const generateKeyboard = (array, value) => {
 };
 
 // updating keyboard keys according to requiremnets
-const updateKeys = (currentArray, keyType = 'keyboardKey') => {
+const updateKeyboardState = (currentArray, keyType = 'keyboardKey') => {
   const specialKeys = [];
   currentArray.forEach((el) => {
     el.forEach((element) => {
@@ -75,6 +75,7 @@ const updateKeys = (currentArray, keyType = 'keyboardKey') => {
   });
 };
 
+let capsLockEnabled = false;
 // keyyboard keys handlers
 const onKeysDown = (e) => {
   e.preventDefault();
@@ -84,7 +85,15 @@ const onKeysDown = (e) => {
     } else {
       currnetLanguage = keyLayoutEn;
     }
-    updateKeys(currnetLanguage);
+    updateKeyboardState(currnetLanguage);
+  }
+  if (e.code === 'CapsLock') {
+    capsLockEnabled = !capsLockEnabled;
+  }
+  if (capsLockEnabled) {
+    updateKeyboardState(currnetLanguage, 'caps');
+  } else {
+    updateKeyboardState(currnetLanguage);
   }
   document.querySelectorAll('.keyboard__key').forEach((key) => {
     if (key.classList.contains(`${e.code}`)) {
@@ -93,8 +102,14 @@ const onKeysDown = (e) => {
   });
 };
 
-const onKeysUp = () => {
+const onKeysUp = (e) => {
+  if (e.code === 'CapsLock' && capsLockEnabled) {
+    updateKeyboardState(currnetLanguage, 'caps');
+  }
   document.querySelectorAll('.keyboard__key').forEach((key) => {
+    if (capsLockEnabled) {
+      document.querySelector('.CapsLock').classList.add('active');
+    }
     key.classList.remove('active');
   });
 };
