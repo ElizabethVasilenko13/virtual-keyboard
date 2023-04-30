@@ -79,7 +79,8 @@ const updateKeyboardState = (currentArray, keyType = 'keyboardKey') => {
   });
 };
 
-function textareaFilling(event) {
+// put new symbol into textarea
+const textareaFilling = (event) => {
   const textarea = document.querySelector('.textarea-body');
   textarea.focus();
   const cursorPosition = textarea.selectionStart;
@@ -111,13 +112,12 @@ function textareaFilling(event) {
     textarea.value = `${textarea.value.slice(0, cursorPosition)}${document.querySelector(`.${event.code}`).textContent}${textarea.value.slice(cursorPosition)}`;
     textarea.setSelectionRange(cursorPosition + 1, cursorPosition + 1);
   }
-}
+};
 
 let capsLockEnabled = false;
 
 // capsLock handler
-
-function onCapsLock(e) {
+const onCapsLock = (e) => {
   if ((e.code === 'CapsLock' || e.target.classList.contains('CapsLock'))) {
     if (capsLockEnabled) {
       updateKeyboardState(currnetLanguage);
@@ -127,23 +127,29 @@ function onCapsLock(e) {
       updateKeyboardState(currnetLanguage, 'caps');
     }
   }
-}
+};
 
-function onShift(e) {
-  if (e.shiftKey || e.target.classList.contains('ShiftRight') || e.target.classList.contains('ShiftLeft')) {
-    updateKeyboardState(currnetLanguage, 'shift');
-    if (capsLockEnabled) {
-      document.querySelectorAll('.keyboard__key').forEach((el) => {
-        if (!el.classList.contains('service-key')) {
-          const keyValue = el;
-          keyValue.textContent = keyValue.textContent.toLowerCase();
-        }
-      });
-    }
+// change language when CapsLokk and Shift are on
+const changeLanguageWithCapsAndShift = () => {
+  updateKeyboardState(currnetLanguage, 'shift');
+  if (capsLockEnabled) {
+    document.querySelectorAll('.keyboard__key').forEach((el) => {
+      if (!el.classList.contains('service-key')) {
+        const keyValue = el;
+        keyValue.textContent = keyValue.textContent.toLowerCase();
+      }
+    });
   }
-}
+};
 
-function outShift(e) {
+// chanhe keyboard layout when shift is pressing
+const onShift = (e) => {
+  if (e.shiftKey || e.target.classList.contains('ShiftRight') || e.target.classList.contains('ShiftLeft')) {
+    changeLanguageWithCapsAndShift();
+  }
+};
+
+const outShift = (e) => {
   if (!e.shiftKey || e.target.classList.contains('shift')) {
     if (capsLockEnabled) {
       updateKeyboardState(currnetLanguage, 'caps');
@@ -151,7 +157,33 @@ function outShift(e) {
       updateKeyboardState(currnetLanguage);
     }
   }
-}
+};
+
+// swith language when Ctrl and Alt are pressing
+const onCtrlAlt = (e) => {
+  const shiftLeft = document.querySelector('.ShiftLeft');
+  const ShiftRight = document.querySelector('.ShiftRight');
+  if (e.ctrlKey && e.altKey) {
+    if (currnetLanguage === keyLayoutEn) {
+      currnetLanguage = keyLayoutUa;
+    } else {
+      currnetLanguage = keyLayoutEn;
+    }
+
+    if ((capsLockEnabled && e.shiftKey)
+    || (capsLockEnabled && (ShiftRight.classList.contains('active') || shiftLeft.classList.contains('active')))) {
+      changeLanguageWithCapsAndShift();
+    } else if ((capsLockEnabled && e.shiftKey)
+    || (capsLockEnabled && (!ShiftRight.classList.contains('active') || !shiftLeft.classList.contains('active')))) {
+      updateKeyboardState(currnetLanguage, 'caps');
+    } else if ((!capsLockEnabled && e.shiftKey)
+    || (!capsLockEnabled && (ShiftRight.classList.contains('active') || shiftLeft.classList.contains('active')))) {
+      updateKeyboardState(currnetLanguage, 'shift');
+    } else {
+      updateKeyboardState(currnetLanguage);
+    }
+  }
+};
 
 // keyyboard keys handlers
 const onKeysDown = (e) => {
@@ -161,19 +193,13 @@ const onKeysDown = (e) => {
   textareaFilling(e);
   onCapsLock(e);
   onShift(e);
-
-  if (e.ctrlKey && e.altKey) {
-    if (currnetLanguage === keyLayoutEn) {
-      currnetLanguage = keyLayoutUa;
-    } else {
-      currnetLanguage = keyLayoutEn;
-    }
-    updateKeyboardState(currnetLanguage);
-  }
+  onCtrlAlt(e);
 };
 
 const onKeysUp = (e) => {
-  outShift(e);
+  if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+    outShift(e);
+  }
   if (e.code === 'CapsLock' && capsLockEnabled) {
     document.querySelector(`.${e.code}`).classList.add('active');
   } else {
