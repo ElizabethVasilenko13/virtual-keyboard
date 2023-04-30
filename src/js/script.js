@@ -117,17 +117,51 @@ let capsLockEnabled = false;
 
 // capsLock handler
 
-function onCapsLock(capsLockState) {
-  if (capsLockState) {
-    updateKeyboardState(currnetLanguage, 'caps');
-  } else {
-    updateKeyboardState(currnetLanguage);
+function onCapsLock(e) {
+  if ((e.code === 'CapsLock' || e.target.classList.contains('CapsLock'))) {
+    if (capsLockEnabled) {
+      updateKeyboardState(currnetLanguage);
+      capsLockEnabled = false;
+    } else {
+      capsLockEnabled = true;
+      updateKeyboardState(currnetLanguage, 'caps');
+    }
+  }
+}
+
+function onShift(e) {
+  if (e.shiftKey || e.target.classList.contains('ShiftRight') || e.target.classList.contains('ShiftLeft')) {
+    updateKeyboardState(currnetLanguage, 'shift');
+    if (capsLockEnabled) {
+      document.querySelectorAll('.keyboard__key').forEach((el) => {
+        if (!el.classList.contains('service-key')) {
+          const keyValue = el;
+          keyValue.textContent = keyValue.textContent.toLowerCase();
+        }
+      });
+    }
+  }
+}
+
+function outShift(e) {
+  if (!e.shiftKey || e.target.classList.contains('shift')) {
+    if (capsLockEnabled) {
+      updateKeyboardState(currnetLanguage, 'caps');
+    } else {
+      updateKeyboardState(currnetLanguage);
+    }
   }
 }
 
 // keyyboard keys handlers
 const onKeysDown = (e) => {
   e.preventDefault();
+  document.querySelector(`.${e.code}`).classList.add('active');
+
+  textareaFilling(e);
+  onCapsLock(e);
+  onShift(e);
+
   if (e.ctrlKey && e.altKey) {
     if (currnetLanguage === keyLayoutEn) {
       currnetLanguage = keyLayoutUa;
@@ -136,64 +170,15 @@ const onKeysDown = (e) => {
     }
     updateKeyboardState(currnetLanguage);
   }
-
-  textareaFilling(e);
-
-  if (e.code === 'CapsLock') {
-    capsLockEnabled = !capsLockEnabled;
-  }
-  // if (e.shiftKey && !capsLockEnabled) {
-  //   updateKeyboardState(currnetLanguage, 'shift');
-  // }
-  if (capsLockEnabled && e.shiftKey) {
-    updateKeyboardState(currnetLanguage);
-    document.querySelectorAll('.keyboard__key').forEach((el) => {
-      if (!el.classList.contains('service-key')) {
-        const keyValue = el;
-        keyValue.textContent = keyValue.textContent.toLowerCase();
-      }
-    });
-  } else if (e.shiftKey && !capsLockEnabled) {
-    updateKeyboardState(currnetLanguage, 'shift');
-  } else if (!e.shiftKey && capsLockEnabled) {
-    updateKeyboardState(currnetLanguage, 'caps');
-  } else {
-    updateKeyboardState(currnetLanguage);
-  }
-  onCapsLock(capsLockEnabled);
-  document.querySelectorAll('.keyboard__key').forEach((key) => {
-    // if (key.classList.contains('CapsLock') && capsLockEnabled) {
-    //   key.classList.add('active');
-    // } else {
-    //   key.classList.remove('active');
-    // }
-    if (key.classList.contains(`${e.code}`)) {
-      key.classList.add('active');
-    }
-  });
 };
 
 const onKeysUp = (e) => {
-  if (e.code === 'CapsLock' && capsLockEnabled && e.key !== 'Shift') {
-    updateKeyboardState(currnetLanguage, 'caps');
+  outShift(e);
+  if (e.code === 'CapsLock' && capsLockEnabled) {
+    document.querySelector(`.${e.code}`).classList.add('active');
+  } else {
+    document.querySelector(`.${e.code}`).classList.remove('active');
   }
-  if (!e.shiftKey && !capsLockEnabled) {
-    updateKeyboardState(currnetLanguage);
-  }
-
-  if (!e.shiftKey && capsLockEnabled) {
-    updateKeyboardState(currnetLanguage, 'caps');
-  }
-
-  document.querySelectorAll('.keyboard__key').forEach((key) => {
-    if (key.classList.contains('CapsLock') && capsLockEnabled) {
-      key.classList.add('active');
-    } else if (e.shiftKey && key.classList.contains('shift')) {
-      key.classList.add('active');
-    } else {
-      key.classList.remove('active');
-    }
-  });
 };
 
 const onKeyClick = () => {
@@ -203,35 +188,17 @@ const onKeyClick = () => {
 
   document.querySelectorAll('.keyboard__key').forEach((key) => {
     key.addEventListener('mousedown', (e) => {
-      if (e.target.classList.contains('CapsLock')) {
-        capsLockEnabled = !capsLockEnabled;
-      }
-      if (capsLockEnabled && e.target.classList.contains('shift')) {
-        updateKeyboardState(currnetLanguage);
-        if (!key.classList.contains('service-key')) {
-          key.textContent = key.textContent.toLowerCase();
-        }
-      } else if (!capsLockEnabled && e.target.classList.contains('shift')) {
-        updateKeyboardState(currnetLanguage, 'shift');
-      } else if (capsLockEnabled && !e.target.classList.contains('shift')) {
-        updateKeyboardState(currnetLanguage, 'caps');
-      } else if (!capsLockEnabled && !e.target.classList.contains('shift')) {
-        updateKeyboardState(currnetLanguage);
-      }
+      onCapsLock(e);
+      onShift(e);
       e.target.classList.add('active');
     });
   });
   document.querySelectorAll('.keyboard__key').forEach((key) => {
     key.addEventListener('mouseup', (e) => {
-      if (capsLockEnabled) {
-        updateKeyboardState(currnetLanguage, 'caps');
-        e.target.classList.add('active');
-      } else {
+      if (!capsLockEnabled) {
         e.target.classList.remove('active');
       }
-      if (!capsLockEnabled && e.target.classList.contains('shift')) {
-        updateKeyboardState(currnetLanguage);
-      }
+      outShift(e);
     });
   });
   document.querySelectorAll('.keyboard__key').forEach((key) => {
